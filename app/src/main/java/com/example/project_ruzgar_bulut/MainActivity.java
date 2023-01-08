@@ -6,12 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.SharedPreferencesCompat;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,16 +26,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     //buttons and texts
     private ListView listView;
+    private ListView invertedListView;
     private EditText editText1;
     private EditText editText2;
     private Button btnAdd;
@@ -54,17 +61,21 @@ public class MainActivity extends AppCompatActivity {
 
     private int count = 0;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+
         listView = (ListView) findViewById(R.id.liste);
+        invertedListView = findViewById(R.id.invertedList);
         editText1 = (EditText) findViewById(R.id.editText1);
         editText2 = (EditText) findViewById(R.id.editText2);
         btnAdd = (Button) findViewById(R.id.btnEntry);
         btnSave = findViewById(R.id.btnSave);
+        btnInvert = findViewById(R.id.btnInvert);
 
 
         ArrayList<texts> arrayList = new ArrayList<>();
@@ -178,6 +189,29 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     // Handle the exception
                 }
+            }
+        });
+
+        //Invert Strings
+        btnInvert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Assume that the set of strings is called "stringSet"
+                Set<String> invertedSet = new HashSet<>();
+                for (String s : set) {
+                    String inverted = new StringBuilder(s).reverse().toString();
+                    invertedSet.add(inverted);
+                }
+
+                List<String> stringList = new ArrayList<>(invertedSet);  // Convert the set to a list
+
+                Intent intent = new Intent(getApplicationContext(), secondActivity.class);
+                intent.putExtra("string_list", (Serializable) stringList);
+
+                startActivity(intent);
+
+                // Put the inverted set into an intent and start the second activity
+
             }
         });
 

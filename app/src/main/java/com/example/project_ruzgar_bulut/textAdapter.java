@@ -24,6 +24,8 @@ public class textAdapter extends ArrayAdapter<texts> {
         this.mResource=resource;
     }
 
+
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
