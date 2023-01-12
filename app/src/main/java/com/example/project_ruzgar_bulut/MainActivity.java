@@ -4,9 +4,12 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.SharedPreferencesCompat;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int count = 0;
 
+
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         btnAdd = (Button) findViewById(R.id.btnEntry);
         btnSave = findViewById(R.id.btnSave);
         btnInvert = findViewById(R.id.btnInvert);
+        btnClear = findViewById(R.id.btnClear);
 
 
         ArrayList<texts> arrayList = new ArrayList<>();
@@ -154,6 +160,9 @@ public class MainActivity extends AppCompatActivity {
                 String text = editText1.getText().toString();
                 String subtext = editText2.getText().toString();
 
+                editText1.setText("");
+                editText2.setText("");
+
                 arrayList.add(new texts(text, subtext));
                 map.put(text, subtext);
 
@@ -166,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
                 listView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
                 editor.apply();
-
             }
 
         });
@@ -176,11 +184,13 @@ public class MainActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Assume that the set of strings is called "stringSet"
 
+
+                // Assume that the set of strings is called "stringSet"
+                Set<String> setRetrieve = sharedPreferences.getStringSet("map", new HashSet<String>());
                 File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "strings.txt");
                 try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                    for (String s : set) {
+                    for (String s : setRetrieve) {
                         outputStream.write(s.getBytes());
                         outputStream.write("\n".getBytes());  // Write a newline character after each string
                     }
@@ -197,8 +207,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Assume that the set of strings is called "stringSet"
+                Set<String> setRetrieve = sharedPreferences.getStringSet("map", new HashSet<String>());
+
                 Set<String> invertedSet = new HashSet<>();
-                for (String s : set) {
+                for (String s : setRetrieve) {
                     String inverted = new StringBuilder(s).reverse().toString();
                     invertedSet.add(inverted);
                 }
@@ -214,6 +226,23 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        //Clear List
+        btnClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setRetrieve.clear();
+                arrayList.clear();
+                map.clear();
+                set.clear();
+
+
+                listView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+            }
+        });
+
 
 
         //Toast
