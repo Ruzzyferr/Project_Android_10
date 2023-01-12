@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -27,11 +28,14 @@ import java.util.Set;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
+
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -98,21 +102,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void addNotification() {
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle("Notifications Example")
-                        .setContentText("This is a test notification");
+    private void sendNotification(int set){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent
+                ,PendingIntent.FLAG_ONE_SHOT);
 
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_IMMUTABLE);
-        builder.setContentIntent(contentIntent);
+        String ChannelId = "My channel ID";
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,ChannelId)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Notification")
+                .setContentText("You have saved this much entry so far: " + set)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
 
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel(ChannelId,
+                    "Channel human readable title",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        notificationManager.notify(0,notificationBuilder.build());
+
     }
 
 
@@ -123,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+
+
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
 
@@ -255,12 +271,13 @@ public class MainActivity extends AppCompatActivity {
                         outputStream.write("\n".getBytes());  // Write a newline character after each string
                     }
                     outputStream.close();
+                    sendNotification(setRetrieve.size());
                     Toast.makeText(getApplicationContext(), "File saved successfully!",
                             Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                addNotification();
+
 
             }
 

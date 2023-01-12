@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "134870880749",
+    "project_id": "project-ruzgar-bulut",
+    "storage_bucket": "project-ruzgar-bulut.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134870880749:android:a2e7ef19c8fd9c2be397e4",
+        "android_client_info": {
+          "package_name": "com.example.project_ruzgar_bulut"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "134870880749-0etngf1pcf02ittdlf00j4dp54vld3pr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZy-rU2AS1DRhIvasRUGaDHg-WynweoQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "134870880749-0etngf1pcf02ittdlf00j4dp54vld3pr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
