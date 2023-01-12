@@ -1,37 +1,43 @@
 package com.example.project_ruzgar_bulut;
 
-import static android.os.Environment.getExternalStoragePublicDirectory;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.SharedPreferencesCompat;
-
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Set;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,9 +55,16 @@ public class MainActivity extends AppCompatActivity {
     private Button btnInvert;
     private Button btnClear;
     private textAdapter adapter;
+    public static final String CHANNEL_ID = "exampleChannel";
+
+    private NotificationCompat notificationManager;
 
     //to save file
     private File file;
+
+
+
+
 
 
     //switch
@@ -64,6 +77,44 @@ public class MainActivity extends AppCompatActivity {
 
     private int count = 0;
 
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
+
+    private void addNotification() {
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                        .setContentTitle("Notifications Example")
+                        .setContentText("This is a test notification");
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(contentIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(0, builder.build());
+    }
+
 
 
     @SuppressLint("MissingInflatedId")
@@ -72,6 +123,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+
+        mBuilder.setSmallIcon(R.drawable.ic_launcher_foreground);
+        mBuilder.setContentTitle("Notification Alert, Click Me!");
+        mBuilder.setContentText("Hi, This is Android Notification Detail!");
 
 
         listView = (ListView) findViewById(R.id.liste);
@@ -83,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         btnInvert = findViewById(R.id.btnInvert);
         btnClear = findViewById(R.id.btnClear);
 
-
+        //LISTS
         ArrayList<texts> arrayList = new ArrayList<>();
         HashMap<String, String> map = new HashMap<>();
         Set<String> set = new HashSet<>();
@@ -114,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         }
+
+
 
 
         //night mode - light mode
@@ -184,22 +243,30 @@ public class MainActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 // Assume that the set of strings is called "stringSet"
                 Set<String> setRetrieve = sharedPreferences.getStringSet("map", new HashSet<String>());
-                File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "strings.txt");
-                try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                verifyStoragePermissions(MainActivity.this);
+                try  {
+                    File file = new File(Environment.getExternalStoragePublicDirectory
+                            (Environment.DIRECTORY_DOWNLOADS), "strings.txt");
+                    FileOutputStream outputStream = new FileOutputStream(file);
                     for (String s : setRetrieve) {
                         outputStream.write(s.getBytes());
                         outputStream.write("\n".getBytes());  // Write a newline character after each string
                     }
+                    outputStream.close();
                     Toast.makeText(getApplicationContext(), "File saved successfully!",
                             Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
-                    // Handle the exception
+                    e.printStackTrace();
                 }
+                addNotification();
+
             }
+
+
+
+
         });
 
         //Invert Strings
@@ -255,5 +322,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+
     }
+
 }
