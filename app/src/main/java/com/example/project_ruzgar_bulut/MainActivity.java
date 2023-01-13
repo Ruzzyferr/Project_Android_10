@@ -60,15 +60,12 @@ public class MainActivity extends AppCompatActivity {
     private Button btnClear;
     private textAdapter adapter;
     public static final String CHANNEL_ID = "exampleChannel";
+    public static int count = 0;
 
     private NotificationCompat notificationManager;
 
     //to save file
     private File file;
-
-
-
-
 
 
     //switch
@@ -79,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<texts> arrayList;
 
-    private int count = 0;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -102,17 +98,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void sendNotification(int set){
+    private void sendNotification(int num){
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,intent
                 ,PendingIntent.FLAG_ONE_SHOT);
 
+
+
         String ChannelId = "My channel ID";
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,ChannelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("Notification")
-                .setContentText("You have saved this much entry so far: " + set)
+                .setContentText("You have paused this many times so far: " + num)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
 
@@ -129,7 +127,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        count++;
+        sendNotification(count);
+    }
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -271,7 +274,6 @@ public class MainActivity extends AppCompatActivity {
                         outputStream.write("\n".getBytes());  // Write a newline character after each string
                     }
                     outputStream.close();
-                    sendNotification(setRetrieve.size());
                     Toast.makeText(getApplicationContext(), "File saved successfully!",
                             Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
@@ -320,6 +322,9 @@ public class MainActivity extends AppCompatActivity {
                 map.clear();
                 set.clear();
 
+                editor = sharedPreferences.edit();
+                editor.putStringSet("map", set);
+                editor.apply();
 
                 listView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
